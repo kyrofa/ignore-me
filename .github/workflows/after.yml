@@ -37,4 +37,8 @@ jobs:
       - name: Extract snap artifact
         run: unzip snap.zip
 
-      - run: ls -l
+      - name: Install snapcraft
+        run: sudo apt-get update -qq && sudo snap install --classic snapcraft
+
+      - name: Snapcraft login
+        run: echo "$SNAPCRAFT_TOKEN" | snapcraft login --with -
