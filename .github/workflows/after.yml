@@ -45,3 +45,5 @@ jobs:
 
       - name: Snapcraft login
         run: echo "$SNAPCRAFT_TOKEN" | snapcraft login --with -
+
+      - run: echo "::notice title=This is a test title::This is a test message"
