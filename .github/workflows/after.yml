@@ -46,4 +46,8 @@ jobs:
       - name: Snapcraft login
         run: echo "$SNAPCRAFT_TOKEN" | snapcraft login --with -
 
-      - run: echo "::notice title=This is a test title::This is a test message"
+      - name: Set annotation
+        uses: actions/github-script@v5
+        with:
+          script: |
+            core.notice('Test notice');
