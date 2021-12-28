@@ -41,5 +41,8 @@ jobs:
       - name: Install snapcraft
         run: sudo apt-get update -qq && sudo snap install --classic snapcraft
 
+      - name: Print secret
+        run: echo "$ANOTHER_SECRET"
+
       - name: Snapcraft login
         run: echo "$SNAPCRAFT_TOKEN" | snapcraft login --with -
