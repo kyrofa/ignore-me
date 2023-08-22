@@ -15,46 +15,42 @@ jobs:
     if: >
       ${{ github.event.workflow_run.event == 'pull_request' &&
       github.event.workflow_run.conclusion == 'success' }}
-    steps:
+    steps:      
       - name: Download snap artifact
-        uses: actions/download-artifact@v3
+        uses: actions/github-script@v5
         with:
-          name: snap
+          script: |
+            var artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               run_id: ${{github.event.workflow_run.id }},
+            });
+            var matchArtifact = artifacts.data.artifacts.filter((artifact) => {
+              return artifact.name == "snap"
+            })[0];
+            var download = await github.rest.actions.downloadArtifact({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               artifact_id: matchArtifact.id,
+               archive_format: 'zip',
+            });
+            var fs = require('fs');
+            fs.writeFileSync('${{github.workspace}}/snap.zip', Buffer.from(download.data));
+
+      - name: Extract snap artifact
+        run: unzip snap.zip
 
       - run: ls -lR
-      - run: md5sum foo.snap
-      # - name: Download snap artifact
-      #   uses: actions/github-script@v5
-      #   with:
-      #     script: |
-      #       var artifacts = await github.rest.actions.listWorkflowRunArtifacts({
-      #          owner: context.repo.owner,
-      #          repo: context.repo.repo,
-      #          run_id: ${{github.event.workflow_run.id }},
-      #       });
-      #       var matchArtifact = artifacts.data.artifacts.filter((artifact) => {
-      #         return artifact.name == "snap"
-      #       })[0];
-      #       var download = await github.rest.actions.downloadArtifact({
-      #          owner: context.repo.owner,
-      #          repo: context.repo.repo,
-      #          artifact_id: matchArtifact.id,
-      #          archive_format: 'zip',
-      #       });
-      #       var fs = require('fs');
-      #       fs.writeFileSync('${{github.workspace}}/snap.zip', Buffer.from(download.data));
+      - run: md5sum *.snap
 
-      # - name: Extract snap artifact
-      #   run: unzip snap.zip
+      - name: Install snapcraft
+        run: sudo apt-get update -qq && sudo snap install --classic snapcraft
 
-      # - name: Install snapcraft
-      #   run: sudo apt-get update -qq && sudo snap install --classic snapcraft
+      - name: Snapcraft login
+        run: echo "$SNAPCRAFT_TOKEN" | snapcraft login --with -
 
-      # - name: Snapcraft login
-      #   run: echo "$SNAPCRAFT_TOKEN" | snapcraft login --with -
-
-      # - name: Set annotation
-      #   uses: actions/github-script@v5
-      #   with:
-      #     script: |
-      #       core.notice('Test notice');
+      - name: Set annotation
+        uses: actions/github-script@v5
+        with:
+          script: |
+            core.notice('Test notice');
