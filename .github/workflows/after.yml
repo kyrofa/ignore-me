@@ -37,6 +37,9 @@ jobs:
             var fs = require('fs');
             fs.writeFileSync('${{github.workspace}}/snap.zip', Buffer.from(download.data));
 
+      - name: Print PR number
+        run: echo "${{ github.event.workflow_run.event.number }}"
+
       - name: Extract snap artifact
         run: unzip snap.zip
 
