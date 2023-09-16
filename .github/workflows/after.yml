@@ -15,53 +15,55 @@ jobs:
     if: >
       ${{ github.event.workflow_run.event == 'pull_request' &&
       github.event.workflow_run.conclusion == 'success' }}
-    steps:      
+    steps:
+      - name: Determine release channel
+        uses: actions/github-script@v6
+        id: determine-channel
+        with:
+          result-encoding: string
+          script: |
+            const workflowRun = await github.rest.actions.getWorkflowRun({
+              owner: context.repo.owner,
+               repo: context.repo.repo,
+               run_id: ${{ github.event.workflow_run.id }},
+            });
+
+            const pullRequestCount = workflow_run.data.pull_requests.length;
+            if (pullRequestCount != 1) {
+              throw new Error(`Expected one pull request, but got ${pullRequestCount}`);
+            }
+            
+            const pullRequest = workflow_run.data.pull_requests[0];
+            return `latest/beta/pr-${pullRequest.number}`;
+
       - name: Download snap artifact
         uses: actions/github-script@v5
         with:
           script: |
-            // Calculate pull request ID
-            var workflow_run = await github.rest.actions.getWorkflowRun({
-              owner: context.repo.owner,
-               repo: context.repo.repo,
-               run_id: ${{github.event.workflow_run.id }},
-            });
-
-            if (workflow_run.data.pull_requests.length == 0) {
-              throw new Error('Expected a pull request, but got none!');
-            } else if (workflow_run.data.pull_requests.length > 1) {
-              throw new Error('Expected only one pull request, but got multiple!');
-            }
-            
-            var pull_request_id = workflow_run.data.pull_requests[0].number;
-            var channel = `latest/beta/pr-${pull_request_id}`;
-            console.log(channel);
-
-            var artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
                owner: context.repo.owner,
                repo: context.repo.repo,
                run_id: ${{github.event.workflow_run.id }},
             });
-            var matchArtifact = artifacts.data.artifacts.filter((artifact) => {
+            
+            const snapArtifacts = artifacts.data.artifacts.filter((artifact) => {
               return artifact.name == "snap"
-            })[0];
+            });
+            if (snapArtifacts.length != 1) {
+              throw new Error(`Expected one snap artifact, but got ${snapArtifacts.length}`);
+            }
+
             var download = await github.rest.actions.downloadArtifact({
                owner: context.repo.owner,
                repo: context.repo.repo,
-               artifact_id: matchArtifact.id,
+               artifact_id: snapArtifacts[0].id,
                archive_format: 'zip',
             });
             var fs = require('fs');
             fs.writeFileSync('${{github.workspace}}/snap.zip', Buffer.from(download.data));
 
-      - name: Print PR number
-        run: echo "${{ github.event.workflow_run.event.number }}"
-
       - name: Extract snap artifact
         run: unzip snap.zip
-
-      - run: ls -lR
-      - run: md5sum *.snap
 
       - name: Install snapcraft
         run: sudo apt-get update -qq && sudo snap install --classic snapcraft
@@ -69,8 +71,5 @@ jobs:
       - name: Snapcraft login
         run: echo "$SNAPCRAFT_TOKEN" | snapcraft login --with -
 
-      - name: Set annotation
-        uses: actions/github-script@v5
-        with:
-          script: |
-            core.notice('Test notice');
+      - name: Upload snap
+        run: snapcraft upload *.snap --release="${{ steps.determine-channel.outputs.result }}"
