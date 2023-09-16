@@ -33,12 +33,12 @@ jobs:
         with:
           script: |
             console.log('here 1');
-            console.log(${{ steps.determine-sha.outputs.result }});
+            console.log('${{ steps.determine-sha.outputs.result }}');
             console.log('here 2');
             await github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              sha: ${{ steps.determine-sha.outputs.result }},
+              sha: '${{ steps.determine-sha.outputs.result }}',
               context: 'Snap Builder',
               state: 'pending',
               description: 'Preparing environment...',
@@ -71,7 +71,7 @@ jobs:
             const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
                owner: context.repo.owner,
                repo: context.repo.repo,
-               run_id: ${{github.event.workflow_run.id }},
+               run_id: ${{ github.event.workflow_run.id }},
             });
 
             const snapArtifacts = artifacts.data.artifacts.filter((artifact) => {
