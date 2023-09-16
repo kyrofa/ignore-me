@@ -20,6 +20,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
+            console.log(context.sha);
             const resp = await github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
