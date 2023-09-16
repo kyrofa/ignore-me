@@ -24,7 +24,8 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: context.sha,
-              state: 'This is a test',
+              state: 'pending',
+              description: 'This is a test',
             });
 
       - name: Determine release channel
