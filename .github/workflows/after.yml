@@ -16,6 +16,17 @@ jobs:
       ${{ github.event.workflow_run.event == 'pull_request' &&
       github.event.workflow_run.conclusion == 'success' }}
     steps:
+      - name: Set initial commit status
+        uses: actions/github-script@v6
+        with:
+          script: |
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: 'This is a test',
+            });
+
       - name: Determine release channel
         uses: actions/github-script@v6
         id: determine-channel
@@ -24,8 +35,8 @@ jobs:
           script: |
             const workflowRun = await github.rest.actions.getWorkflowRun({
               owner: context.repo.owner,
-               repo: context.repo.repo,
-               run_id: ${{ github.event.workflow_run.id }},
+              repo: context.repo.repo,
+              run_id: ${{ github.event.workflow_run.id }},
             });
 
             const pullRequestCount = workflowRun.data.pull_requests.length;
