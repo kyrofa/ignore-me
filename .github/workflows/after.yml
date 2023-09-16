@@ -10,8 +10,6 @@ jobs:
   upload:
     runs-on: ubuntu-latest
     environment: snapcraft
-    env:
-      SNAPCRAFT_TOKEN: ${{ secrets.SNAPCRAFT_TOKEN }}
     if: >
       ${{ github.event.workflow_run.event == 'pull_request' &&
       github.event.workflow_run.conclusion == 'success' }}
@@ -87,10 +85,9 @@ jobs:
       - name: Install snapcraft
         run: sudo apt-get update -qq && sudo snap install --classic snapcraft
 
-      - name: Snapcraft login
-        run: echo "$SNAPCRAFT_TOKEN" | snapcraft login --with -
-
       - name: Upload snap
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
         run: snapcraft upload *.snap --release="${{ steps.determine-channel.outputs.result }}"
 
       - name: Set final commit status
@@ -112,7 +109,7 @@ jobs:
               description: "Snap built and released to '${{ steps.determine-channel.outputs.result }}'",
             });
 
-      - name: Set final commit status
+      - name: Set error commit status
         uses: actions/github-script@v6
         if: failure()
         with:
