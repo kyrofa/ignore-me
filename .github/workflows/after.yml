@@ -24,7 +24,7 @@ jobs:
             var job = github.rest.actions.getWorkflowRun({
               owner: context.repo.owner,
                repo: context.repo.repo,
-               job_id: ${{github.event.workflow_run.id }},
+               run_id: ${{github.event.workflow_run.id }},
             });
             console.log(JSON.stringify(job));
             var artifacts = await github.rest.actions.listWorkflowRunArtifacts({
