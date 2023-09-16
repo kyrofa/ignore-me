@@ -32,9 +32,6 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            console.log('here 1');
-            console.log('${{ steps.determine-sha.outputs.result }}');
-            console.log('here 2');
             await github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -103,7 +100,7 @@ jobs:
             await github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              sha: ${{ steps.determine-sha.outputs.result }},
+              sha: '${{ steps.determine-sha.outputs.result }}',
               context: 'Snap Builder',
               state: 'pending',
               description: 'Currently uploading/releasing snap...',
@@ -121,7 +118,7 @@ jobs:
             await github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              sha: ${{ steps.determine-sha.outputs.result }},
+              sha: '${{ steps.determine-sha.outputs.result }}',
               context: 'Snap Builder',
               state: 'success',
               description: "Snap built and released to '${{ steps.determine-channel.outputs.result }}'",
@@ -135,7 +132,7 @@ jobs:
             await github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              sha: ${{ steps.determine-sha.outputs.result }},
+              sha: '${{ steps.determine-sha.outputs.result }}',
               context: 'Snap Builder',
               state: 'error',
               description: 'Snap failed to upload/release',
