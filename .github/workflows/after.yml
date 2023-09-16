@@ -36,7 +36,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ steps.determine-sha.outputs.result }}',
-              context: 'Snap Builder',
+              context: 'Snap Publisher',
               state: 'pending',
               description: 'Preparing environment...',
             });
@@ -101,7 +101,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ steps.determine-sha.outputs.result }}',
-              context: 'Snap Builder',
+              context: 'Snap Publisher',
               state: 'pending',
               description: 'Currently uploading/releasing snap...',
             });
@@ -119,7 +119,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ steps.determine-sha.outputs.result }}',
-              context: 'Snap Builder',
+              context: 'Snap Publisher',
               state: 'success',
               description: "Snap built and released to '${{ steps.determine-channel.outputs.result }}'",
             });
@@ -133,7 +133,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ steps.determine-sha.outputs.result }}',
-              context: 'Snap Builder',
+              context: 'Snap Publisher',
               state: 'error',
               description: 'Snap failed to upload/release',
             });
