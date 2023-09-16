@@ -26,14 +26,13 @@ jobs:
               run_id: ${{ github.event.workflow_run.id }},
             });
 
-            console.log(workflowRun.data.head_sha);
-
             const resp = await github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: workflowRun.data.head_sha,
+              context: 'Snap Builder',
               state: 'pending',
-              description: 'This is a test',
+              description: 'Currently uploading/releasing snap...',
             });
 
       - name: Determine release channel
@@ -91,5 +90,24 @@ jobs:
       - name: Snapcraft login
         run: echo "$SNAPCRAFT_TOKEN" | snapcraft login --with -
 
-      - name: Upload snap
-        run: snapcraft upload *.snap --release="${{ steps.determine-channel.outputs.result }}"
+      # - name: Upload snap
+      #   run: snapcraft upload *.snap --release="${{ steps.determine-channel.outputs.result }}"
+
+      - name: Set final commit status
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const workflowRun = await github.rest.actions.getWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: ${{ github.event.workflow_run.id }},
+            });
+
+            const resp = await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: workflowRun.data.head_sha,
+              context: 'Snap Builder',
+              state: 'success',
+              description: "Snap built and released to '${{ steps.determine-channel.outputs.result }}'",
+            });
