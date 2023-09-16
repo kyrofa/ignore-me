@@ -56,7 +56,7 @@ jobs:
             return `latest/beta/pr-${pullRequest.number}`;
 
       - name: Download snap artifact
-        uses: actions/github-script@v5
+        uses: actions/github-script@v6
         with:
           script: |
             const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
@@ -90,8 +90,8 @@ jobs:
       - name: Snapcraft login
         run: echo "$SNAPCRAFT_TOKEN" | snapcraft login --with -
 
-      # - name: Upload snap
-      #   run: snapcraft upload *.snap --release="${{ steps.determine-channel.outputs.result }}"
+      - name: Upload snap
+        run: snapcraft upload *.snap --release="${{ steps.determine-channel.outputs.result }}"
 
       - name: Set final commit status
         uses: actions/github-script@v6
