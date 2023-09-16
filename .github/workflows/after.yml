@@ -26,14 +26,12 @@ jobs:
               run_id: ${{ github.event.workflow_run.id }},
             });
 
-            console.log(JSON.stringify(workflowRun));
-            console.log('here');
-            console.log(JSON.stringify(${{ github.event }}));
+            console.log(workflowRun.data.head_sha);
 
             const resp = await github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              sha: context.sha,
+              sha: workflowRun.data.head_sha,
               state: 'pending',
               description: 'This is a test',
             });
