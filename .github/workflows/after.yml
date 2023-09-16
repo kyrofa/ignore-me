@@ -16,11 +16,13 @@ jobs:
       ${{ github.event.workflow_run.event == 'pull_request' &&
       github.event.workflow_run.conclusion == 'success' }}
     steps:
+      - name: print event
+        run: echo "${{ github.event }}"
+
       - name: Set initial commit status
         uses: actions/github-script@v6
         with:
           script: |
-            console.log(context.sha);
             const resp = await github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -28,7 +30,6 @@ jobs:
               state: 'pending',
               description: 'This is a test',
             });
-            console.log(JSON.stringify(resp));
 
       - name: Determine release channel
         uses: actions/github-script@v6
