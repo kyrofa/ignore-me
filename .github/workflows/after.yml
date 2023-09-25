@@ -41,16 +41,27 @@ jobs:
               description: 'Preparing environment...',
             });
 
-      - name: Get info about triggering workflow
-        uses: potiuk/get-workflow-origin@v1
-        id: workflow-run-info
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          sourceRunId: ${{ github.event.workflow_run.id }}
-
       - name: Determine release channel
+        uses: actions/github-script@v6
         id: determine-channel
-        run: echo "channel=latest/beta/pr-${steps.workflow-run-info.outputs.pullRequestNumber}" >> $GITHUB_OUTPUT
+        with:
+          result-encoding: string
+          script: |
+            const pullRequests = await octokit.paginate(
+              `GET /repos/${process.env.GITHUB_REPOSITORY}/pulls``,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              }
+            )
+
+            const matchingPullRequests = pullRequests.filter(pr => pullRequest.head.sha === '${{ steps.determine-sha.outputs.result }}');
+            const pullRequestCount = matchingPullRequests.length;
+            if (pullRequestCount != 1) {
+              throw new Error(`Expected one pull request to contain commit, but got ${pullRequestCount}`);
+            }
+
+            return `latest/beta/pr-${pullRequest.number}`;
 
       - name: Download snap artifact
         uses: actions/github-script@v6
@@ -100,7 +111,7 @@ jobs:
       - name: Upload snap
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
-        run: snapcraft upload *.snap --release="${{ steps.determine-channel.outputs.channel }}"
+        run: snapcraft upload *.snap --release="${{ steps.determine-channel.outputs.result }}"
 
       - name: Set final commit status
         uses: actions/github-script@v6
@@ -112,7 +123,7 @@ jobs:
               sha: '${{ steps.determine-sha.outputs.result }}',
               context: 'Snap Publisher',
               state: 'success',
-              description: "Snap built and released to '${{ steps.determine-channel.outputs.channel }}'",
+              description: "Snap built and released to '${{ steps.determine-channel.outputs.result }}'",
             });
 
       - name: Set error commit status
