@@ -61,7 +61,7 @@ jobs:
               throw new Error(`Expected one pull request to contain commit, but got ${pullRequestCount}`);
             }
 
-            return `latest/beta/pr-${pullRequest.number}`;
+            return `latest/beta/pr-${matchingPullRequests[0].number}`;
 
       - name: Download snap artifact
         uses: actions/github-script@v6
