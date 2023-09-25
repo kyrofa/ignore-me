@@ -55,7 +55,7 @@ jobs:
               }
             );
 
-            const matchingPullRequests = pullRequests.filter(pr => pullRequest.head.sha === '${{ steps.determine-sha.outputs.result }}');
+            const matchingPullRequests = pullRequests.filter(pr => pr.head.sha === '${{ steps.determine-sha.outputs.result }}');
             const pullRequestCount = matchingPullRequests.length;
             if (pullRequestCount != 1) {
               throw new Error(`Expected one pull request to contain commit, but got ${pullRequestCount}`);
