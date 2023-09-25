@@ -7,8 +7,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - run: touch foo.snap
-      - run: md5sum foo.snap
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: sudo snap install --classic snapcraft
+
+      - name: Build snap
+        run: snapcraft --destructive-mode
 
       - name: Upload snap artifact
         uses: actions/upload-artifact@v3
