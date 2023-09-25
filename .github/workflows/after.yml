@@ -48,12 +48,12 @@ jobs:
           result-encoding: string
           script: |
             const pullRequests = await octokit.paginate(
-              `GET /repos/${process.env.GITHUB_REPOSITORY}/pulls``,
+              `GET /repos/${process.env.GITHUB_REPOSITORY}/pulls`,
               {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
               }
-            )
+            );
 
             const matchingPullRequests = pullRequests.filter(pr => pullRequest.head.sha === '${{ steps.determine-sha.outputs.result }}');
             const pullRequestCount = matchingPullRequests.length;
